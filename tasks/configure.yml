@@ -1,7 +1,7 @@
 ---
 - name: Set templatized Telegraf configuration
-  template: 
-    src: telegraf.conf.j2 
+  template:
+    src: telegraf.conf.j2
     dest: "{{ telegraf_configuration_dir }}/telegraf.conf"
     force: yes
     backup: yes
@@ -17,7 +17,7 @@
 - name: Modify user Telegraf should run as
   command: sed -i s/GROUP=.*/GROUP={{ telegraf_runas_group }}/ /etc/init.d/telegraf
   when: telegraf_runas_group != "telegraf"
-  
+
 - name: Start the Telegraf service
   service:
     name: telegraf
@@ -28,9 +28,9 @@
 
 - name: Pause to ensure Telegraf service is up
   pause:
-    seconds: 6 
+    seconds: 6
   when: telegraf_started.changed and telegraf_start_service
-  
+
 - name: Collect service status
   command: service telegraf status
   register: telegraf_service_status

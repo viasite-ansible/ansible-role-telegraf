@@ -1,6 +1,6 @@
 ---
 - name: restart telegraf
-  service: 
+  service:
     name: telegraf
     state: restarted
 
