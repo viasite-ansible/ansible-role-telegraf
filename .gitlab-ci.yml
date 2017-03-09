@@ -1,0 +1,7 @@
+---
+
+test:
+  tags:
+    - vagrant
+  script:
+    - molecule --debug test

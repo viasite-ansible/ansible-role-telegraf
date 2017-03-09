@@ -1,0 +1,44 @@
+---
+# cannot test with docker, systemd required for "Start the Telegraf service",
+# "msg": "no service or tool found for: telegraf"
+#driver:
+#  name: docker
+#docker:
+#  containers:
+#    - name: ansible-role-telegraf
+#      image: ubuntu
+#      image_version: latest
+#      volume_mounts:
+#        - ${MOLECULE_APTPROXY_PATH}:/etc/apt/apt.conf.d/00aptproxy
+#      ansible_groups:
+#        - group1
+
+driver:
+  name: vagrant
+vagrant:
+  platforms:
+    #- name: trusty64
+    #  box: bento/ubuntu-14.04
+    #  ansible_groups:
+    #    - group1
+    - name: xenial64
+      box: bento/ubuntu-16.04
+      ansible_groups:
+        - group1
+  providers:
+    - name: virtualbox
+      type: virtualbox
+  instances:
+    - name: vagrant-01
+      ansible_groups:
+        - group_1
+      interfaces:
+        - network_name: private_network
+          type: dhcp
+          auto_config: true
+      options:
+        append_platform_to_hostname: True
+
+
+ansible:
+  playbook: tests/playbook.yml

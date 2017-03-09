@@ -18,6 +18,7 @@
   ignore_errors: yes
   register: telegraf_service_status
   when: telegraf_start_service
+  tags: skip_ansible_lint
 
 - name: assert running
   assert:
