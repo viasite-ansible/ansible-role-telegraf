@@ -37,3 +37,4 @@
 - name: Reload systemd configuration [systemd]
   command: systemctl daemon-reload
   when: telegraf_unit_file_updated is defined and telegraf_unit_file_updated.changed
+  tags: skip_ansible_lint
