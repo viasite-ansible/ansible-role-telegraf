@@ -21,6 +21,6 @@ galaxy_info:
         - squeeze
         - jessie
         - wheezy
-  categories:
+  galaxy_tags:
     - monitoring
 dependencies: []

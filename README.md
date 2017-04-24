@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/viasite-ansible/ansible-role-telegraf.svg?branch=master)](https://travis-ci.org/viasite-ansible/ansible-role-telegraf)
+
 Telegraf
 ========
 
