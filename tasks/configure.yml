@@ -24,10 +24,12 @@
 - name: Modify user Telegraf should run as [sysvinit]
   command: sed -i s/USER=.*/USER={{ telegraf_runas_user }}/ /etc/init.d/telegraf
   when: telegraf_runas_user != "telegraf" and telegraf_sysvinit_script.stat.exists
+  tags: skip_ansible_lint
 
 - name: Modify group Telegraf should run as [sysvinit]
   command: sed -i s/GROUP=.*/GROUP={{ telegraf_runas_group }}/ /etc/init.d/telegraf
   when: telegraf_runas_group != "telegraf" and telegraf_sysvinit_script.stat.exists
+  tags: skip_ansible_lint
 
 - name: Create systemd service directory [systemd]
   file:
