@@ -5,12 +5,12 @@ sudo: required
 services:
   - docker
 
-# just syntax check, real provision only in gitlab-ci with vagrant
-install: pip install ansible ansible-lint
+before_install:
+  - docker --version
+install:
+  - pip install molecule docker
 script:
-  - echo localhost > inventory
-  - ansible-playbook -i inventory --syntax-check --list-tasks test.yml
-  - ansible-lint test.yml
+  - molecule test
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
