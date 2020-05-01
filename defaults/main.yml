@@ -6,8 +6,13 @@ telegraf_install_version: stable
 telegraf_runas_user: telegraf
 telegraf_runas_group: telegraf
 
+# Configuration Template
+telegraf_configuration_template: telegraf.conf.j2
+
 # Configuration Variables
 telegraf_tags:
+telegraf_aws_tags: false
+telegraf_aws_tags_prefix:
 
 telegraf_agent_interval: 10s
 telegraf_round_interval: "true"
@@ -40,7 +45,7 @@ telegraf_influxdb_password:
 telegraf_influxdb_user_agent:
 telegraf_influxdb_udp_payload:
 
-telegraf_plugins:
+telegraf_plugins_base:
   - name: mem
   - name: system
   - name: cpu
@@ -60,14 +65,11 @@ telegraf_plugins:
     options:
       exe: "influxd"
       prefix: "influxdb"
-  - name: procstat
-    options:
-      pid_file: "/var/lib/neo4j/data/neo4j-service.pid"
-      prefix: "neo4j_proc"
-
   - name: net
     options:
       interfaces:
         - "eth0"
+
+telegraf_plugins: "{{ telegraf_plugins_base }} + {{ telegraf_plugins_extra | default([]) }}"
 
 telegraf_influxdata_base_url: "https://repos.influxdata.com"

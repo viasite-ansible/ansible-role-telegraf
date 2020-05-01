@@ -1,4 +1,4 @@
-
+---
 - name: Start the Telegraf service
   service:
     name: telegraf
@@ -9,3 +9,4 @@
     - "pause"
     - "check status"
     - "assert running"
+  become: true

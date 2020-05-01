@@ -20,10 +20,15 @@
 # with 'required'. Be sure to edit those to make this configuration work.
 
 # Tags can also be specified via a normal map, but only one form at a time:
-[tags]
+[global_tags]
 {% if telegraf_tags is defined and telegraf_tags != None %}
 {% for key, value in telegraf_tags.items()%}
    {{ key }} = "{{ value }}"
+{% endfor %}
+{% endif %}
+{% if telegraf_aws_tags == true and ec2_tags is defined and ec2_tags != None %}
+{% for key, value in ec2_tags.tags.items()%}
+   {{ telegraf_aws_tags_prefix }}{{ key }} = "{{ value }}"
 {% endfor %}
 {% endif %}
 
@@ -125,9 +130,9 @@
   # ssl_key = "{{ telegraf_influxdb_ssl_key }}"
 {% endif %}
 
-  ## Use SSL but skip chain & host verification
 {% if telegraf_influxdb_insecure_skip_verify is defined and telegraf_influxdb_insecure_skip_verify != None %}
-  # insecure_skip_verify = telegraf_influxdb_insecure_skip_verify
+  ## Use SSL but skip chain & host verification
+  insecure_skip_verify = {{ telegraf_influxdb_insecure_skip_verify }}
 {% endif %}
 
 ###############################################################################
@@ -147,7 +152,7 @@
 {% endif %}
 {% else %}
 {% if value == "true" or value == "false" or value is number %}
-    {{ key }} = {{ value }}
+    {{ key }} = {{ value | lower }}
 {% else %}
     {{ key }} = "{{ value }}"
 {% endif %}
@@ -166,7 +171,7 @@
 {% endif %}
 {% else %}
 {% if lv2_value == "true" or lv2_value == "false" or lv2_value is number %}
-      {{ lv2_key }} = {{ lv2_value }}
+      {{ lv2_key }} = {{ lv2_value | lower }}
 {% else %}
       {{ lv2_key }} = "{{ lv2_value }}"
 {% endif %}
