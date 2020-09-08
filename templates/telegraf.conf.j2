@@ -83,6 +83,8 @@
 
 [outputs]
 
+{% if telegraf_influxdb is defined and telegraf_influxdb != "false" %}
+
 # Configuration for influxdb server to send metrics to
 [[outputs.influxdb]]
   # The full HTTP or UDP endpoint URL for your InfluxDB instance.
@@ -135,10 +137,62 @@
   insecure_skip_verify = {{ telegraf_influxdb_insecure_skip_verify }}
 {% endif %}
 
+{% endif %}
+
+#####################################################################
+#                   Additional OUTPUT Plugins                       #
+#####################################################################
+
+
+{% for output in telegraf_outputs %}
+[[outputs.{{ output.name }}]]
+{% if output.options is defined %}
+{% for key, value in output.options.items() %}
+{% if value is not mapping %}
+{% if value is sequence and value is not string %}
+{% if value[0] is number %}
+    {{ key }} = [ {{ value|join(', ') }} ]
+{% else %}
+    {{ key }} = [ "{{ value|join('", "') }}" ]
+{% endif %}
+{% else %}
+{% if value == "true" or value == "false" or value is number %}
+    {{ key }} = {{ value | lower }}
+{% else %}
+    {{ key }} = "{{ value }}"
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% for key, value in output.options.items() %}
+{% if value is mapping %}
+    [inputs.{{ output.name }}.{{ key }}]
+{% for lv2_key, lv2_value in value.items() %}
+{% if lv2_value is sequence and lv2_value is not string %}
+{% if lv2_value[0] is number %}
+      {{ lv2_key }} = [ {{ lv2_value|join(', ') }} ]
+{% else %}
+      {{ lv2_key }} = [ "{{ lv2_value|join('", "') }}" ]
+{% endif %}
+{% else %}
+{% if lv2_value == "true" or lv2_value == "false" or lv2_value is number %}
+      {{ lv2_key }} = {{ lv2_value | lower }}
+{% else %}
+      {{ lv2_key }} = "{{ lv2_value }}"
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+
 ###############################################################################
 #                                  PLUGINS                                    #
 ###############################################################################
 
+[inputs]
 {% for plugin in telegraf_plugins %}
 [[inputs.{{ plugin.name }}]]
 {% if plugin.options is defined %}
