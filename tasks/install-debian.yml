@@ -2,8 +2,8 @@
 - name: Install any necessary dependencies [Debian/Ubuntu]
   apt:
     name:
-      - python-httplib2
-      - python-apt
+      - "{{ 'python3-httplib2' if ansible_distribution_version is version_compare('22.04', '>=') else 'python-httplib2' }}"
+      - "{{ 'python3-apt' if ansible_distribution_version is version_compare('22.04', '>=') else 'python-apt' }}"
       - curl
       - apt-transport-https
     state: present

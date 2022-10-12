@@ -17,6 +17,7 @@ galaxy_info:
         - vivid
         - xenial
         - focal
+        - jammy
     - name: Debian
       versions:
         - squeeze
