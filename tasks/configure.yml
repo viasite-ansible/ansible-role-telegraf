@@ -17,8 +17,8 @@
     dest: "{{ telegraf_configuration_dir }}/telegraf.conf"
     force: yes
     backup: yes
-    owner: telegraf
-    group: telegraf
+    owner: root
+    group: root
     mode: 0744
   when: telegraf_template_configuration
   # If config changes, restart telegraf and confirm it remained running
