@@ -72,6 +72,6 @@ telegraf_plugins_base:
         - "eth0"
 
 telegraf_outputs: []
-telegraf_plugins: "{{ telegraf_plugins_base }} + {{ telegraf_plugins_extra | default([]) }}"
+telegraf_plugins: "{{ telegraf_plugins_base | union(telegraf_plugins_extra | default([])) }}"
 
 telegraf_influxdata_base_url: "https://repos.influxdata.com"
