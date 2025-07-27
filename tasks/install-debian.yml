@@ -2,9 +2,10 @@
 - name: Install any necessary dependencies [Debian/Ubuntu]
   apt:
     name:
-      #- "{{ 'python3-httplib2' if ansible_distribution_version is version_compare('22.04', '>=') else 'python-httplib2' }}"
       - "{{ 'python3-apt' if ansible_distribution_version is version_compare('22.04', '>=') else 'python-apt' }}"
       - apt-transport-https
+      - curl
+      - gpg
     state: present
     update_cache: true
     cache_valid_time: 3600
@@ -13,28 +14,70 @@
   retries: 2
   delay: 5
 
-- name: Import InfluxData GPG signing key [Debian/Ubuntu]
-  apt_key:
-    url: "{{ telegraf_influxdata_base_url }}/influxdb.key"
-    state: present
+- name: Check if InfluxData GPG key is already installed [Debian/Ubuntu]
+  stat:
+    path: /etc/apt/trusted.gpg.d/influxdata-archive.gpg
+  register: gpg_key_installed
   when: telegraf_install_url is not defined or telegraf_install_url == None
 
+- name: Download InfluxData GPG key [Debian/Ubuntu]
+  get_url:
+    url: https://repos.influxdata.com/influxdata-archive.key
+    dest: /tmp/influxdata-archive.key
+    mode: '0644'
+    force: false
+  when: 
+    - telegraf_install_url is not defined or telegraf_install_url == None
+    - not gpg_key_installed.stat.exists
+
+- name: Verify GPG key fingerprint [Debian/Ubuntu]
+  shell: |
+    gpg --show-keys --with-fingerprint --with-colons /tmp/influxdata-archive.key 2>&1 \
+    | grep -q '^fpr:\+24C975CBA61A024EE1B631787C3D57159FC2F927:$'
+  register: gpg_verify_result
+  failed_when: gpg_verify_result.rc != 0
+  changed_when: false
+  when: 
+    - telegraf_install_url is not defined or telegraf_install_url == None
+    - not gpg_key_installed.stat.exists
+
+- name: Install InfluxData GPG key [Debian/Ubuntu]
+  shell: |
+    cat /tmp/influxdata-archive.key \
+    | gpg --dearmor \
+    | tee /etc/apt/trusted.gpg.d/influxdata-archive.gpg > /dev/null
+  when: 
+    - telegraf_install_url is not defined or telegraf_install_url == None
+    - not gpg_key_installed.stat.exists
+
 - name: Add InfluxData repository [Debian/Ubuntu]
-  apt_repository:
-    repo: deb {{ telegraf_influxdata_base_url }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} {{ telegraf_install_version }}
-    state: present
+  lineinfile:
+    path: /etc/apt/sources.list.d/influxdata.list
+    line: 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main'
+    create: yes
+    mode: '0644'
+  when: telegraf_install_url is not defined or telegraf_install_url == None
+
+- name: Update apt cache [Debian/Ubuntu]
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
   when: telegraf_install_url is not defined or telegraf_install_url == None
 
 - name: Install Telegraf packages [Debian/Ubuntu]
   apt:
     name: telegraf
     state: present
-    update_cache: true
-    cache_valid_time: 3600
   register: apt_result
   until: apt_result is success
   retries: 2
   delay: 5
+  when: telegraf_install_url is not defined or telegraf_install_url == None
+
+- name: Clean up temporary GPG key file [Debian/Ubuntu]
+  file:
+    path: /tmp/influxdata-archive.key
+    state: absent
   when: telegraf_install_url is not defined or telegraf_install_url == None
 
 - name: Download Telegraf package via URL [Debian/Ubuntu]
